@@ -29,3 +29,10 @@ DEPO_ACCT_INFO = {
 #__________________No need to edit the code below____________________________________________________________
 
 eom = EOM(YEAR, MONTH, CSV_DIR, EXP_ACCT_INFO, DEPO_ACCT_INFO)
+eom.tally_exp_accts()
+eom.tally_depo_accts()
+eom.summary["Expenses"] = eom.get_total(eom.summary["Expenses"], "Expenses")
+eom.summary["Deposits"] = eom.get_total(eom.summary["Deposits"], "Deposits")
+eom.print_acct_details()
+
+#TODO: ask Brian--is there a way to abbreviate words? I don't like to have extremly long variable names
