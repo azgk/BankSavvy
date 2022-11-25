@@ -2,8 +2,8 @@ from date_ranges import DateRange
 from eom import EOM
 
 # ________________Enter your bank information below____________________________
-YEAR = 2022   # Year format: 4-digit year.
-MONTH = "07"  # Month format: 2-digit month.
+YEAR = 2022   # Year format: 4-digit year, integer.
+MONTH = 7  # Month format: integer.
 CSV_DIR = "csv_files"
 
 # Enter account name and csv file column names of each expense account. Format:
@@ -34,5 +34,3 @@ eom.tally_depo_accts()
 eom.summary["Expenses"] = eom.get_total(eom.summary["Expenses"], "Expenses")
 eom.summary["Deposits"] = eom.get_total(eom.summary["Deposits"], "Deposits")
 eom.print_acct_details()
-
-#TODO: ask Brian--is there a way to abbreviate words? I don't like to have extremly long variable names
