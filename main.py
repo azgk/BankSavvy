@@ -12,25 +12,15 @@ CSV_DIR = "csv_files"
 #  bank_acct_2_name: {"acct_col": (.......)},
 # }
 # The column names should be given in the same order as shown above.
-EXP_ACCT_INFO = {
-  "Gringott Wizarding Bank": {"acct_col": ("Date", "Category", "Withdrawals", "Description")},
-  "Citibank": {"acct_col": ("Transaction Date", "Category", "Amount", "Description")},
-  "Duchess Credit Union": {"acct_col": ("Posted Date", "Category", "Amount", "Payee")},
-  "Durmstrang Associated": {"acct_col": ("Date", "Category", "Amount", "Description")},
-}
-
-# Enter information of each deposit account. Format is the same as that for expense accounts.
-# If an account has both expenses and deposits, the respective information should be entered into
-# both EXP_ACCT_INFO and DEPO_ACCT_INFO.
-DEPO_ACCT_INFO = {
-  "Gringott Wizarding Bank": {"acct_col": ("Date", "Category", "Deposits", "Description")},
+ACCT_INFO = {
+  "Gringott Wizarding Bank": {"acct_cols": ("Date", "Category", "Withdrawals", "Description"), "uncommon_col": "Deposits"},
+  "Citibank": {"acct_cols": ("Transaction Date", "Category", "Amount", "Description")},
+  "Duchess Credit Union": {"acct_cols": ("Posted Date", "Category", "Amount", "Payee")},
+  "Durmstrang Associated": {"acct_cols": ("Date", "Category", "Amount", "Description")},
 }
 
 #__________________No need to edit the code below____________________________________________________________
 
-eom = EOM(YEAR, MONTH, CSV_DIR, EXP_ACCT_INFO, DEPO_ACCT_INFO)
-eom.tally_exp_accts()
-eom.tally_depo_accts()
-eom.summary["Expenses"] = eom.get_total(eom.summary["Expenses"], "Expenses")
-eom.summary["Deposits"] = eom.get_total(eom.summary["Deposits"], "Deposits")
+eom = EOM(YEAR, MONTH, CSV_DIR, ACCT_INFO)
+eom.tally_all_accts()
 eom.print_acct_details()
