@@ -1,25 +1,18 @@
-from date_ranges import DateRange
 from eom import EOM
 
-# ________________Enter your bank information below____________________________
+# Enter year and month here.
 YEAR = 2022   # Year format: 4-digit year, integer.
 MONTH = 7  # Month format: integer.
-CSV_DIR = "csv_files"
+CSV_DIR = "csv_files"  # Drop your csv files here.
 
-# Enter account name and csv file column names of each expense account. Format:
-# {bank_acct_1_name: {"acct_col": (column name for date, column name for category, column name for dollar amount,
-#                                column name for description)},
-#  bank_acct_2_name: {"acct_col": (.......)},
-# }
-# The column names should be given in the same order as shown above.
+# ACCT_INFO has unique .csv column headers used by each bank.
+# uncommon_col: One of the banks has two columns for expenses/deposits instead of one in their .csv files.
 ACCT_INFO = {
-  "Gringott Wizarding Bank": {"acct_cols": ("Date", "Category", "Withdrawals", "Description"), "uncommon_col": "Deposits"},
-  "Citibank": {"acct_cols": ("Transaction Date", "Category", "Amount", "Description")},
-  "Duchess Credit Union": {"acct_cols": ("Posted Date", "Category", "Amount", "Payee")},
-  "Durmstrang Associated": {"acct_cols": ("Date", "Category", "Amount", "Description")},
+  "PNC": {"acct_cols": ("Date", "Category", "Withdrawals", "Description"), "uncommon_col": "Deposits"},
+  "Chase": {"acct_cols": ("Transaction Date", "Category", "Amount", "Description")},
+  "Bank of America": {"acct_cols": ("Posted Date", "Category", "Amount", "Payee")},
+  "Wells Fargo": {"acct_cols": ("Date", "Category", "Amount", "Description")},
 }
-
-#__________________No need to edit the code below____________________________________________________________
 
 eom = EOM(YEAR, MONTH, CSV_DIR, ACCT_INFO)
 eom.tally_all_accts()
