@@ -18,6 +18,9 @@ Personal EOM analyzes transaction data to provide a breakdown of expenses/deposi
 2. In main.py, enter YEAR and MONTH. 
 3. Run the program.
 
+## Program Output
+![program output](program_output.png)
+
 ## Caveat
 1. Personal EOM has been tested for debit and credit accounts from the four banks mentioned above. It may not work with accounts from other banks or special accounts such as a money market account. 
 2. This program does not analyze internal transfers e.g. transfers between two accounts under your name. 
