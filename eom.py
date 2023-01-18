@@ -6,8 +6,8 @@ import pprint
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 
-class EOM:
-  def __init__(self, year, month, EOM_month_dir, acct_info):
+class EndOfMonthFinance:
+  def __init__(self, year=2023, month=1, EOM_month_dir="csv_files", acct_info={"acct": "acct info"}):
     self.year = year
     self.month = month
     self.month_dir = EOM_month_dir

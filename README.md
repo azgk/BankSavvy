@@ -19,7 +19,7 @@ Personal EOM analyzes transaction data to provide a breakdown of expenses/deposi
 3. Run the program.
 
 ## Program Output
-![program output](program_output.png)
+<img alt="A screenshot of program output example." src="program_output.png" title="Program Output" width="80%"/>
 
 ## Caveat
 1. Personal EOM has been tested for debit and credit accounts from the four banks mentioned above. It may not work with accounts from other banks or special accounts such as a money market account. 
