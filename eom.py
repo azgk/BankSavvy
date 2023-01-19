@@ -72,7 +72,7 @@ class EndOfMonthFinance:
       if uncommon_col is None:
         for index, row in month_df.iterrows():
           try:
-            month_df.at[index, amount_col] = 0 - locale.atof(row[amount_col][1:])
+            month_df.at[index, amount_col] = -1 * locale.atof(row[amount_col][1:])
           # Whenever "$" is used, Expense is often shown as positive in bank data. Thus making it negative so that it
           # matches the format/pattern of other bank data.
           except TypeError:  # When the cell is blank (NaN).
