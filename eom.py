@@ -6,8 +6,44 @@ import pprint
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 
+def convert_dollarStr(month_df=None, amount_col="Amount", uncommon_col="Deposits"):
+  """
+  Convert dollar amount from string to float if needed.
+  :param month_df: A Pandas DataFrame (df) filtered for data from a particular month.
+  :param amount_col: The header of dollar amount column in df.
+  :param uncommon_col: A second column (if any) for dollar amount.
+  :return: month_df: A modified month_df.
+  """
+  # Check if type of dollar amount is string.
+  for index, row in month_df.iterrows():
+    if pandas.isna(row[amount_col]):
+      pass
+    else:
+      amount_is_str = isinstance(row[amount_col], str)
+      break
+
+  # Convert string to float.
+  if amount_is_str:
+    if uncommon_col is None:
+      for index, row in month_df.iterrows():
+        try:
+          month_df.at[index, amount_col] = 0 - locale.atof(row[amount_col][1:])
+        # Whenever "$" is used, Expense is often shown as positive in bank data. Thus making it negative so that it
+        # matches the format/pattern of other bank data.
+        except TypeError:  # When the cell is blank (NaN).
+          pass
+    else:
+      for index, row in month_df.iterrows():
+        if pandas.isna(row[amount_col]):
+          month_df.at[index, uncommon_col] = locale.atof(row[uncommon_col][1:])
+        else:
+          month_df.at[index, amount_col] = -1 * locale.atof(row[amount_col][1:])
+
+  return month_df
+
+
 class EndOfMonthFinance:
-  def __init__(self, year=2023, month=1, EOM_month_dir="csv_files", acct_info={"acct": "acct info"}):
+  def __init__(self, year=2023, month=1, EOM_month_dir="csv_files", acct_info=None):
     self.year = year
     self.month = month
     self.month_dir = EOM_month_dir
@@ -51,41 +87,6 @@ class EndOfMonthFinance:
       }
     }
 
-  def convert_dollarStr(self, month_df, amount_col, uncommon_col):
-    """
-    Convert dollar amount from string to float if needed.
-    :param month_df: A Pandas DataFrame (df) filtered for data from a particular month.
-    :param amount_col: The header of dollar amount column in df.
-    :param uncommon_col: A second column (if any) for dollar amount.
-    :return: month_df: A modified month_df.
-    """
-    # Check if type of dollar amount is string.
-    for index, row in month_df.iterrows():
-      if pandas.isna(row[amount_col]):
-        pass
-      else:
-        amount_is_str = isinstance(row[amount_col], str)
-        break
-
-    # Convert string to float.
-    if amount_is_str:
-      if uncommon_col is None:
-        for index, row in month_df.iterrows():
-          try:
-            month_df.at[index, amount_col] = 0 - locale.atof(row[amount_col][1:])
-          # Whenever "$" is used, Expense is often shown as positive in bank data. Thus making it negative so that it
-          # matches the format/pattern of other bank data.
-          except TypeError:  # When the cell is blank (NaN).
-            pass
-      else:
-        for index, row in month_df.iterrows():
-          if pandas.isna(row[amount_col]):
-            month_df.at[index, uncommon_col] = locale.atof(row[uncommon_col][1:])
-          else:
-            month_df.at[index, amount_col] = 0 - locale.atof(row[amount_col][1:])
-
-    return month_df
-
   def modify_df(self, df, date_col, amount_col, acct):
     """
     Filter df by date then convert dollar amount from str to float.
@@ -104,7 +105,8 @@ class EndOfMonthFinance:
 
     self.acct_info[acct].setdefault("uncommon_col", None)  # Exception: when there is a second column for dollar
     # amount # in .csv the second column also needs to have dollar strings converted to integers.
-    modified_df = self.convert_dollarStr(month_df, amount_col, self.acct_info[acct]["uncommon_col"])
+    modified_df = convert_dollarStr(month_df=month_df, amount_col=amount_col, uncommon_col=self.acct_info[acct]
+                                    ["uncommon_col"])
     return modified_df
 
   def add_to_summary(self, transaction_dict, transaction_type):
