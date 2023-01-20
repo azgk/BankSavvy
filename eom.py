@@ -158,33 +158,45 @@ class EndOfMonthFinance:
         this_category = None
     return this_category
 
-  def tally_one_acct(self, acct, acct_cols):
+  def tally_one_file(self, modified_df=None, acct=None, acct_cols=None, acct_expenses=None, acct_deposits=None):
     """
-    Calculate expenses/deposits from one bank account.
+    Calculate expenses/deposits in a .csv file.
+    :param modified_df: dataframe filtered by date; any dollar amount in str converted to float.
+    :param acct_cols: .csv column headers.
+    :return: acct_expenses, acct_deposits (dict of category mapped to dollar amount).
+    """
+    date_col, category_col, amount_col, description_col = acct_cols
+
+    # Determine category then tally numbers for each category.
+    for (index, row) in modified_df.iterrows():
+      this_category = self.read_keywords(row, description_col, category_col)
+      if this_category is not None:  # The tally does not include rows for internal transfers (e.g. credit card
+        # payments).
+        if row[amount_col] < 0:  # For expenses (negative float).
+          acct_expenses[this_category] = acct_expenses.setdefault(this_category, 0) + row[amount_col]
+        elif row[amount_col] > 0:  # For credit card refund etc (positive float).
+          acct_deposits[this_category] = acct_deposits.setdefault(this_category, 0) + row[amount_col]
+        elif pandas.isna(row[amount_col]):  # Exception: PNC csv has one column for withdrawals and another for
+          # deposits. For each row, one of these two columns is empty.
+          uncommon_amount_col = self.acct_info[acct]["uncommon_col"]
+          acct_deposits[this_category] = acct_deposits.setdefault(this_category, 0) + row[uncommon_amount_col]
+    return acct_expenses, acct_deposits
+
+  def tally_one_acct(self, acct=None, acct_cols=None):
+    """
+    Load .csv , modify and then calculate expenses/deposits from one bank account.
     :param acct: Account name.
     :param acct_cols: Headers of columns in .csv files.
     :return: acct_expenses(dict) and acct_deposits (dict)
     """
-    # Modify csv data (filter by date, convert dollar amount from string to float)
     date_col, category_col, amount_col, description_col = acct_cols
     acct_expenses, acct_deposits = {}, {}
     for f_name in glob.glob(f"{self.month_dir}/{acct}/*"):
       df = pandas.read_csv(f_name)
+      # Modify csv data (filter by date, convert dollar amount from string to float)
       modified_df = self.modify_df(df, date_col, amount_col, acct)
-
-      # Determine category then tally numbers for each category.
-      for (index, row) in modified_df.iterrows():
-        this_category = self.read_keywords(row, description_col, category_col)
-        if this_category is not None:  # The tally does not include rows for internal transfers (e.g. credit card
-          # payments).
-          if row[amount_col] < 0:  # For expenses (negative float).
-            acct_expenses[this_category] = acct_expenses.setdefault(this_category, 0) + row[amount_col]
-          elif row[amount_col] > 0:  # For credit card refund etc (positive float).
-            acct_deposits[this_category] = acct_deposits.setdefault(this_category, 0) + row[amount_col]
-          elif pandas.isna(row[amount_col]):  # Exception: PNC csv has one column for withdrawals and another for
-            # deposits. For each row, one of these two columns is empty.
-            uncommon_amount_col = self.acct_info[acct]["uncommon_col"]
-            acct_deposits[this_category] = acct_deposits.setdefault(this_category, 0) + row[uncommon_amount_col]
+      acct_expenses, acct_deposits = self.tally_one_file(modified_df=modified_df, acct=acct, acct_cols=acct_cols, acct_expenses=acct_expenses,
+                                                         acct_deposits=acct_deposits)
     return acct_expenses, acct_deposits
 
   def tally_all_accts(self):
@@ -194,7 +206,7 @@ class EndOfMonthFinance:
     :return: None.
     """
     for acct, info in self.acct_info.items():
-      acct_expenses, acct_deposits = self.tally_one_acct(acct, info["acct_cols"])
+      acct_expenses, acct_deposits = self.tally_one_acct(acct=acct, acct_cols=info["acct_cols"])
       self.add_to_summary(acct_expenses, "Expenses")
       self.acct_info[acct]["Expenses"] = [acct_expenses, {"Total": self.get_total(acct_expenses)}]
       self.add_to_summary(acct_deposits, "Deposits")
