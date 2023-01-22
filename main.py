@@ -16,4 +16,5 @@ ACCT_INFO = {
 
 eom = EndOfMonthFinance(year=YEAR, month=MONTH, EOM_month_dir=CSV_DIR, acct_info=ACCT_INFO)
 eom.tally_all_accts()
+eom.print_summary()
 eom.print_acct_details()

@@ -212,17 +212,27 @@ class EndOfMonthFinance:
       self.add_to_summary(acct_deposits, "Deposits")
       self.acct_info[acct]["Deposits"] = [acct_deposits, {"Total": self.get_total(acct_deposits)}]
 
+  def summary_df(self, transction_type):
+    print(f"Summary_{transction_type}: ")
+    self.summary[transction_type].append({"Total": self.get_total(self.summary[transction_type][0])})
+    deposits_col_headers = ["Category", "Amount"]
+    deposits_data = [[key, value] for key, value in self.summary[transction_type][0].items()]
+    deposits_data.append(["Total", self.summary[transction_type][1]["Total"]])
+    deposits_row_headers = list(self.summary[transction_type][0].keys())
+    deposits_row_headers.append("Total")
+    index = [i for i in range(1, len(deposits_row_headers) + 1)]
+    return pandas.DataFrame(deposits_data, index=index, columns=deposits_col_headers)
+
+  def print_summary(self):
+    self.summary = {k: [v] for k, v in self.summary.items()}
+    print(self.summary_df("Deposits"), "\n")
+    print(self.summary_df("Expenses"), "\n")
+
   def print_acct_details(self):
     pp = pprint.PrettyPrinter(indent=2)
-    print("Summary: ")
-    self.summary = {k: [v] for k, v in self.summary.items()}
-    self.summary["Deposits"].append({"Total": self.get_total(self.summary["Deposits"][0])})
-    self.summary["Expenses"].append({"Total": self.get_total(self.summary["Expenses"][0])})
-    pp.pprint(self.summary)
-
-    print("\nAccount Details\n")
+    print("Account Details\n")
     for acct, info in self.acct_info.items():
       for type in ("Deposits", "Expenses"):
-        print(f"{acct}_{type}:")
+        print(f"{acct} {type}:")
         pp.pprint(info[f"{type}"])
-      print("\n")
+        print("\n")
