@@ -5,6 +5,8 @@ import glob
 import pprint
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
+TRANSACTION_TYPES = ("Deposits", "Expenses")
+
 
 def convert_dollarStr(month_df=None, amount_col=None, uncommon_col="Deposits"):
   """
@@ -116,27 +118,28 @@ class EndOfMonthFinance:
                                     ["uncommon_col"])
     return modified_df
 
-  def add_to_summary(self, acct=None, transaction_type=None):
+  def add_to_summary(self, acct=None, *transaction_types):
     """
     Tally up everything to self.summary.
     :param transaction_dict: a dict of expenses or a dict of deposits.
     :param transaction_type: a string. "Expenses" or "Deposits".
     :return: None.
     """
-    transaction_dict = self.acct_info[acct][transaction_type][0]
-    for key, value in transaction_dict.items():
-      if key in self.summary[transaction_type]:
-        self.summary[transaction_type][key] += value
-      elif key in self.category_ref:  # Modify category names (change them to standardized ones).
-        new_key = self.category_ref[key]
-        self.summary[transaction_type].setdefault(new_key, 0)
-        self.summary[transaction_type][new_key] += value
-      elif transaction_type == "Expenses":
-        self.summary[transaction_type]["Discretionary"] += value
-      elif transaction_type == "Deposits":
-          self.summary[transaction_type]["Miscellaneous"] += value
+    for transaction_type in transaction_types:
+      transaction_dict = self.acct_info[acct][transaction_type][0]
+      for key, value in transaction_dict.items():
+        if key in self.summary[transaction_type]:
+          self.summary[transaction_type][key] += value
+        elif key in self.category_ref:  # Modify category names (change them to standardized ones).
+          new_key = self.category_ref[key]
+          self.summary[transaction_type].setdefault(new_key, 0)
+          self.summary[transaction_type][new_key] += value
+        elif transaction_type == "Expenses":
+          self.summary[transaction_type]["Discretionary"] += value
+        elif transaction_type == "Deposits":
+            self.summary[transaction_type]["Miscellaneous"] += value
 
-    self.acct_info[acct][transaction_type].append({"Total": self.get_total(transaction_dict)})
+      self.acct_info[acct][transaction_type].append({"Total": self.get_total(transaction_dict)})
 
   def get_total(self, transaction_dict):
     """
@@ -175,8 +178,8 @@ class EndOfMonthFinance:
     :return: acct_expenses, acct_deposits (dict of category mapped to dollar amount).
     """
     date_col, category_col, amount_col, description_col = self.acct_info[acct]["acct_cols"]
-    acct_expenses = self.acct_info[acct]["Expenses"][0]
-    acct_deposits = self.acct_info[acct]["Deposits"][0]
+    acct_expenses = {} # self.acct_info[acct]["Expenses"][0]
+    acct_deposits = {} # self.acct_info[acct]["Deposits"][0]
     # Determine category then tally numbers for each category.
     for (index, row) in modified_df.iterrows():
       this_category = self.read_keywords(row, description_col, category_col)
@@ -190,6 +193,12 @@ class EndOfMonthFinance:
           # deposits. For each row, one of these two columns is empty.
           uncommon_amount_col = self.acct_info[acct]["uncommon_col"]
           acct_deposits[this_category] = acct_deposits.setdefault(this_category, 0) + row[uncommon_amount_col]
+    return acct_expenses, acct_deposits
+
+  def add_fileDict_to_acctDict(self, acct=None, *transaction_types, file_dict=None):
+    for transction_type in transaction_types:
+      for key, value in file_dict:
+        self.acct_info[acct][transction_type].setdefault(key, 0) + value
 
   def tally_one_acct(self, acct=None):
     """
@@ -204,7 +213,8 @@ class EndOfMonthFinance:
     for f_path in glob.glob(f"{self.month_dir}/{acct}/*"):
       # Modify csv data (filter by date, convert dollar amount from string to float)
       modified_df = self.modify_df(f_path, acct)
-      self.tally_one_file(modified_df=modified_df, acct=acct)
+      acct_expenses, acct_deposits = self.tally_one_file(modified_df=modified_df, acct=acct)
+      self.add_fileDict_to_acctDict(*TRANSACTION_TYPES, acct=acct, file_dict=acct_expenses)
 
   def tally_all_accts(self):
     """
@@ -214,30 +224,30 @@ class EndOfMonthFinance:
     """
     for acct, info in self.acct_info.items():
       self.tally_one_acct(acct)
-      self.add_to_summary(acct=acct, transaction_type="Expenses")
-      self.add_to_summary(acct=acct, transaction_type="Deposits")
+      self.add_to_summary(acct=acct, *TRANSACTION_TYPES)
 
-  def summary_df(self, transaction_type):
-    print(f"Summary_{transaction_type}: ")
-    self.summary[transaction_type].append({"Total": self.get_total(self.summary[transaction_type][0])})
-    col_headers = ["Category", "Amount"]
-    transaction_data = [[key, value] for key, value in self.summary[transaction_type][0].items()]
-    transaction_data.append(["Total", self.summary[transaction_type][1]["Total"]])
-    row_headers = list(self.summary[transaction_type][0].keys())
-    row_headers.append("Total")
-    index = [i for i in range(1, len(row_headers) + 1)]
-    return pandas.DataFrame(transaction_data, index=index, columns=col_headers)
+  def summary_df(self, *transaction_types):
+    for transaction_type in transaction_types:
+      print(f"Summary_{transaction_type}: ")
+      self.summary[transaction_type].append({"Total": self.get_total(self.summary[transaction_type][0])})
+      col_headers = ["Category", "Amount"]
+      transaction_data = [[key, value] for key, value in self.summary[transaction_type][0].items()]
+      transaction_data.append(["Total", self.summary[transaction_type][1]["Total"]])
+      row_headers = list(self.summary[transaction_type][0].keys())
+      row_headers.append("Total")
+      index = [i for i in range(1, len(row_headers) + 1)]
+      print("\n")
+      return pandas.DataFrame(transaction_data, index=index, columns=col_headers)
 
   def print_summary(self):
     self.summary = {k: [v] for k, v in self.summary.items()}
-    print(self.summary_df("Deposits"), "\n")
-    print(self.summary_df("Expenses"), "\n")
+    print(self.summary_df(*TRANSACTION_TYPES))
 
   def print_acct_details(self):
     pp = pprint.PrettyPrinter(indent=2)
     print("Account Details\n")
     for acct, info in self.acct_info.items():
-      for type in ("Deposits", "Expenses"):
-        print(f"{acct} {type}:")
-        pp.pprint(info[f"{type}"])
+      for transaction_type in TRANSACTION_TYPES:
+        print(f"{acct} {transaction_type}:")
+        pp.pprint(info[f"{transaction_type}"])
         print("\n")
