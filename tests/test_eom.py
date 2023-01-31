@@ -31,11 +31,21 @@ def test_tally_one_file(**modified_dfs):
   for acct, modified_df in modified_dfs.items():
     file_expenses, file_deposits = eom.tally_one_file(acct=acct, modified_df=modified_df)
     accts_dicts[acct] = {"file_expenses": file_expenses, "file_deposits": file_deposits}
-    print(f"{acct}_file_dicts:\n", accts_dicts[acct])
+    print(f"\n{acct}_file_dicts:\n", accts_dicts[acct])
   return accts_dicts
 
 
 accts_dicts = test_tally_one_file(**modified_dfs)
+
+# Tests on eom.tally_one_acct
+def test_tally_one_acct(**acct_dicts):
+  for acct in acct_dicts.keys():
+    eom.tally_one_acct(acct)
+    print(f"\n{acct}_attr_dict:\n", eom.acct_info[acct])
+
+
+test_tally_one_acct(**accts_dicts)
+
 
 
 

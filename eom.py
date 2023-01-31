@@ -173,7 +173,7 @@ class EndOfMonthFinance:
     """
     Calculate expenses/deposits in a .csv file.
     :param modified_df: dataframe filtered by date; any dollar amount in str converted to float.
-    :return: file_expenses, file_deposits (dict of category mapped to dollar amount).
+    :return: A dict containing file_expenses (dict) and file_deposits (dict). Each file dict has categories mapped to dollar amounts, generated from one file.
     """
     date_col, category_col, amount_col, description_col = self.acct_info[acct]["acct_cols"]
     file_expenses = {}
@@ -191,13 +191,19 @@ class EndOfMonthFinance:
           # deposits. For each row, one of these two columns is empty.
           uncommon_amount_col = self.acct_info[acct]["uncommon_col"]
           file_deposits[this_category] = file_deposits.setdefault(this_category, 0) + row[uncommon_amount_col]
+    file_dicts = {"Expenses": file_expenses, "Deposits": file_deposits}
+    return file_dicts
 
-    return file_expenses, file_deposits
-
-  def add_fileDict_to_acctDict(self, acct=None, file_dict=None):
-    for transaction_type in TRANSACTION_TYPES:
-      for key, value in file_dict.items():
-        self.acct_info[acct][transaction_type][0][key] = self.acct_info[acct][transaction_type][0].setdefault(key, 0) + value
+  def add_fileDict_to_attrDict(self, acct=None, file_dicts=None):
+    """
+    Add file dicts to class attribute self.acct_info.
+    :file_dicts: A dict containing file_expenses (dict) and file_deposits (dict).
+    :return: None
+    """
+    for transaction_type, file_dict in file_dicts.items():
+      for category, amount in file_dict.items():
+        self.acct_info[acct][transaction_type][0][category] = self.acct_info[acct][transaction_type][0].setdefault\
+                                                                (category, 0) + amount
 
   def tally_one_acct(self, acct=None):
     """
@@ -212,8 +218,8 @@ class EndOfMonthFinance:
     for f_path in glob.glob(f"{self.month_dir}/{acct}/*"):
       # Modify csv data (filter by date, convert dollar amount from string to float)
       modified_df = self.modify_df(f_path, acct)
-      file_expenses, file_deposits = self.tally_one_file(modified_df=modified_df, acct=acct)
-      self.add_fileDict_to_acctDict(acct=acct, file_dict=file_expenses)
+      file_dicts = self.tally_one_file(modified_df=modified_df, acct=acct)
+      self.add_fileDict_to_attrDict(acct=acct, file_dicts=file_dicts)
 
   def tally_all_accts(self):
     """
