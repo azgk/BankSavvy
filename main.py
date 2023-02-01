@@ -5,7 +5,7 @@ YEAR = 2022   # Year format: 4-digit year, integer.
 MONTH = 7  # Month format: integer.
 CSV_DIR = "csv_files"  # Drop your csv files in this directory.
 
-# ACCT_INFO has unique .csv column headers used by each bank.
+# ACCT_INFO has unique CSV column headers used by each bank.
 # uncommon_col: PNC has two columns for expenses/deposits instead of just one in other .csv files.
 ACCT_INFO = {
   "PNC": {"acct_cols": ("Date", "Category", "Withdrawals", "Description"), "uncommon_col": "Deposits"},

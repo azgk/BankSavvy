@@ -46,6 +46,10 @@ def test_tally_one_acct(**acct_dicts):
 
 test_tally_one_acct(**accts_dicts)
 
+# Tests on eom.tally_all_accts
+eom.tally_all_accts()
+print(f"\nSummary:\n", eom.summary)
+
 
 
 

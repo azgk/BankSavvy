@@ -52,7 +52,7 @@ class EndOfMonthFinance:
     self.month_dir = eom_month_dir
     self.acct_info = acct_info
 
-    # Mapping category names in .csv to those chosen for this project.
+    # Mapping category names in .csv to "standard" names (chosen for this project).
     self.category_ref = {
       "Healthcare": "Discretionary",
       "Health & Wellness": "Discretionary",
@@ -94,10 +94,8 @@ class EndOfMonthFinance:
     """
     Filter df by date then convert dollar amount from str to float.
     :param f_path: CSV file absolute path.
-    :param date_col: The header of date column in df.
-    :param amount_col: The header of dollar amount column in df.
-    :param acct: The bank account name.
-    :return: modified_df.
+    :param acct: A bank account name.
+    :return: modified_df (modified Pandas dataframe).
     """
     df = pandas.read_csv(f_path)
     date_col, category_col, amount_col, description_col = self.acct_info[acct]["acct_cols"]
@@ -120,7 +118,7 @@ class EndOfMonthFinance:
 
   def add_to_summary(self, acct=None):
     """
-    Tally up everything to self.summary.
+    Tally up data from all accounts to self.summary.
     :return: None.
     """
     for transaction_type in TRANSACTION_TYPES:
@@ -141,7 +139,9 @@ class EndOfMonthFinance:
 
   def get_total(self, transaction_dict=None):
     """
-    Calculate total expenses or deposits from one bank account.
+    Calculate the total amount of expenses or deposits from one bank account.
+    :param transaction_dict: dict (mapping categories to amounts) of expenses or deposits from one bank account.
+    :return: total amount (float)
     """
     total = sum(transaction_dict.values())
     return total
@@ -149,6 +149,10 @@ class EndOfMonthFinance:
   def read_keywords(self, row=None, description_col=None, category_col=None):
     """
     Rename categories based on keywords in transaction description.
+    :param row: A row in Pandas dataframe.
+    :param description_col: CSV file column header for description column.
+    :param category_col: CSV file column header for description column.
+    :return: renamed_category (string)
     """
     keywords_to_category = {
       "VENMO": "Discretionary",
@@ -161,21 +165,22 @@ class EndOfMonthFinance:
     }
     for keyword, standard_category in keywords_to_category.items():
       if keyword in row[description_col]:
-        this_category = standard_category
+        renamed_category = standard_category
         break
     else:
-      this_category = row[category_col]
-      if this_category == "Transfers" or this_category == "Credit Card Payments":
-        this_category = None
-    return this_category
+      renamed_category = row[category_col]
+      if renamed_category == "Transfers" or renamed_category == "Credit Card Payments":
+        renamed_category = None
+    return renamed_category
 
   def tally_one_file(self, modified_df=None, acct=None):
     """
-    Calculate expenses/deposits in a .csv file.
-    :param modified_df: dataframe filtered by date; any dollar amount in str converted to float.
-    :return: A dict containing file_expenses (dict) and file_deposits (dict). Each file dict has categories mapped to dollar amounts, generated from one file.
+    Tally expenses and deposits in a CSV file.
+    :param modified_df: A Pandas dataframe filtered by date; any dollar amount in str converted to float.
+    :return: A dict containing file_expenses (dict) and file_deposits (dict). Each file dict has categories mapped to
+    dollar amounts (data from one file).
     """
-    date_col, category_col, amount_col, description_col = self.acct_info[acct]["acct_cols"]
+    date_col, category_col, amount_col, description_col = self.acct_info[acct]["acct_cols"]  # Extract CSV column headers.
     file_expenses = {}
     file_deposits = {}
     # Determine category then tally numbers for each category.
@@ -196,7 +201,7 @@ class EndOfMonthFinance:
 
   def add_fileDict_to_attrDict(self, acct=None, file_dicts=None):
     """
-    Add file dicts to class attribute self.acct_info.
+    Add file dicts to class attribute, self.acct_info.
     :file_dicts: A dict containing file_expenses (dict) and file_deposits (dict).
     :return: None
     """
@@ -207,7 +212,7 @@ class EndOfMonthFinance:
 
   def tally_one_acct(self, acct=None):
     """
-    Load .csv , modify and then calculate expenses/deposits from one bank account.
+    Load CSV , modify data and then tally expenses/deposits from one bank account.
     :param acct: Account name.
     :param acct_cols: Headers of columns in .csv files.
     :return: acct_expenses(dict) and acct_deposits (dict)
@@ -223,8 +228,7 @@ class EndOfMonthFinance:
 
   def tally_all_accts(self):
     """
-    Calculate total expenses and total deposits from all bank accounts.
-    :param self
+    Tally expenses and deposits from all bank accounts.
     :return: None.
     """
     for acct, info in self.acct_info.items():
@@ -232,6 +236,10 @@ class EndOfMonthFinance:
       self.add_to_summary(acct=acct)
 
   def summary_df(self):
+    """
+    Creates a Pandas dataframe to display summary of all accounts.
+    :return: A Pandas dataframe of summary.
+    """
     for transaction_type in TRANSACTION_TYPES:
       print(f"Summary_{transaction_type}: ")
       self.summary[transaction_type].append({"Total": self.get_total(self.summary[transaction_type][0])})
