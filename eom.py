@@ -241,7 +241,7 @@ class EndOfMonthFinance:
     :return: A Pandas dataframe of summary.
     """
     for transaction_type in TRANSACTION_TYPES:
-      print(f"Summary_{transaction_type}: ")
+      print(f"\nSummary_{transaction_type}: ")
       self.summary[transaction_type].append({"Total": self.get_total(self.summary[transaction_type][0])})
       col_headers = ["Category", "Amount"]
       transaction_data = [[key, value] for key, value in self.summary[transaction_type][0].items()]
@@ -249,18 +249,17 @@ class EndOfMonthFinance:
       row_headers = list(self.summary[transaction_type][0].keys())
       row_headers.append("Total")
       index = [i for i in range(1, len(row_headers) + 1)]
-      print("\n")
-      return pandas.DataFrame(transaction_data, index=index, columns=col_headers)
+      print(pandas.DataFrame(transaction_data, index=index, columns=col_headers))
 
   def print_summary(self):
     self.summary = {k: [v] for k, v in self.summary.items()}
-    print(self.summary_df())
+    self.summary_df()
 
   def print_acct_details(self):
     pp = pprint.PrettyPrinter(indent=2)
-    print("Account Details\n")
+    print("\nAccount Details\n")
     for acct, info in self.acct_info.items():
       for transaction_type in TRANSACTION_TYPES:
         print(f"{acct} {transaction_type}:")
         pp.pprint(info[f"{transaction_type}"])
-        print("\n")
+      print("\n")
