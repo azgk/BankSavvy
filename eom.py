@@ -162,6 +162,7 @@ class EndOfMonthFinance:
       "CHEWY": "Pets",
       "CREDIT CARD PMT": None,
       "AUTOMATIC PAYMENT": None,
+      "TRANSFER": None,
     }
     for keyword, standard_category in keywords_to_category.items():
       if keyword in row[description_col]:
