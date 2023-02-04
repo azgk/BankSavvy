@@ -163,6 +163,8 @@ class EndOfMonthFinance:
       "CREDIT CARD PMT": None,
       "AUTOMATIC PAYMENT": None,
       "TRANSFER": None,
+      "ELECTRONIC PAYMENT": None,
+      "AUTO PAY": None,
     }
     for keyword, standard_category in keywords_to_category.items():
       if keyword in row[description_col]:
