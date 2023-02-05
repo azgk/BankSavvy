@@ -90,6 +90,9 @@ class EndOfMonthFinance:
       }
     }
 
+  def compare_dates(self, df, date_col, month_begin):
+    pass
+
   def modify_df(self, f_path=None, acct=None):
     """
     Filter df by date then convert dollar amount from str to float.
@@ -102,14 +105,12 @@ class EndOfMonthFinance:
 
     date_range = DateRange(self.year, self.month)
     month_begin, next_month_begin = date_range.month_begin, date_range.next_month_begin
-    if self.month == 12:
-      month_df = df[(df[date_col] >= month_begin)]  # Strings are compared so "12" would be the biggest number and not
-      # smaller than "01" (Jan) of next year.
-    else:
-      month_df = df[(df[date_col] >= month_begin) & (df[date_col] < next_month_begin)]
+    df[date_col] = pandas.to_datetime(df[date_col])
+    month_df = df[(df[date_col] >= month_begin) & (df[date_col] < next_month_begin)]
     # The dataframe is filtered by date--rows with dates bigger than or equal to 1st date of the month AND dates
     # smaller than 1st date of the next month are extracted. (A bank CSV often contains data from multiple months,
     # since billing cycles often span across months. Thus the need for filtering.)
+
     self.acct_info[acct].setdefault("uncommon_col", None)  # Exception: when there is a second column for dollar
     # amount in .csv the second column also needs to have dollar strings converted to integers.
     modified_df = convert_dollarStr(month_df=month_df, amount_col=amount_col, uncommon_col=self.acct_info[acct]
