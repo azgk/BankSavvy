@@ -1,4 +1,4 @@
-<img alt="Image of a notebook" src="background.jpg" title="background image" width="100%"/>
+<img alt="Image of a notebook" src="background.png" title="background image" width="100%"/>
 
 # Personal EOM
 
