@@ -1,4 +1,5 @@
-<img alt="Image of a notebook" src="background.jpg" title="background image" width="80%"/>
+<img alt="Image of a notebook" src="background.jpg" title="background image" width="100%"/>
+
 # Personal EOM
 
 ## Introduction
@@ -20,8 +21,8 @@ Personal EOM analyzes transaction data to provide a breakdown of expenses/deposi
 3. Run the program.
 
 ## Program Output
-<img alt="A screenshot of program output (deposits summary) example." src="program output/program_output_summary_dep.png" title="Program Output(deposits summary)" width="30%"/>
-<img alt="A screenshot of program output (expenses summary) example." src="program output/program_output_summary_exp.png" title="Program Output(expenses summary)" width="30%"/>
+<img alt="A screenshot of program output (deposits summary) example." src="program output/program_output_summary_dep.png" title="Program Output(deposits summary)" width="35%"/>
+<img alt="A screenshot of program output (expenses summary) example." src="program output/program_output_summary_exp.png" title="Program Output(expenses summary)" width="35%"/>
 <img alt="A screenshot of program output (acct detail) example." src="program output/program_output_acct_details.png" title="Program Output(acct details)" width="80%"/>
 
 ## Caveat
