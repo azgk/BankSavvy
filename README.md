@@ -4,7 +4,7 @@
 
 ## Introduction
 
-Do you and your spouse have too many credit cards to keep track of? Are you tired of tracking expenses across various banks and accounts? Are you wary of sharing your online banking passwords with 3rd party apps? 
+Are you tired of tracking expenses across various banks and accounts? Are you wary of sharing your online banking passwords with 3rd party apps? 
 BankSavvy can crunch all the numbers for you so you can easily see where your money is coming and going. 
 
 ## Features
