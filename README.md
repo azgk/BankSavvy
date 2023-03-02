@@ -5,7 +5,7 @@
 ## Introduction
 
 Are you tired of tracking expenses across various banks and accounts? Are you wary of sharing your online banking passwords with 3rd party apps? 
-BankSavvy can crunch all the numbers for you so you can easily see where your money is coming and going. 
+BankSavvy can crunch all the numbers for you so you can easily see where your money is coming and going. To run BankSavvy on Replit, [**click here**](https://replit.com/@azg/BankSavvy).
 
 ## Features
 
